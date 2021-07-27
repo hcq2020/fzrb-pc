@@ -3,8 +3,8 @@
     <div class="df">
       <div>
         <el-select v-model="from.isSubscribe" slot="prepend" placeholder="请选择订阅状态">
-          <el-option label="已订阅" value="1"></el-option>
-          <el-option label="未订阅" value="2"></el-option>
+          <el-option label="已订阅" value="已订阅"></el-option>
+          <el-option label="未订阅" value="未订阅"></el-option>
         </el-select>
       </div>
       <div class="mar18">
@@ -128,19 +128,31 @@
     </div>
     <el-dialog id="dialog" title="修改订阅信息" width="30%" :visible.sync="dialogFormVisible">
       <el-form :model="editFrom">
-        <el-form-item label="活动名称" label-width="20%">
-          <el-input v-model="editFrom.name" autocomplete="off"></el-input>
+        <el-form-item label="个人/单位" label-width="20%">
+          <el-input v-model="editFrom.user" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="活动区域" label-width="20%">
-          <el-select v-model="editFrom.address" placeholder="请选择活动区域">
-            <el-option label="区域一" value="shanghai"></el-option>
-            <el-option label="区域二" value="beijing"></el-option>
-          </el-select>
+        <el-form-item label="联系方式" label-width="20%">
+          <el-input v-model="editFrom.phone" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="派发单位" label-width="20%">
+          <el-input v-model="editFrom.company" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="所在地区" label-width="20%">
+          <el-input v-model="editFrom.address" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="详细地址" label-width="20%">
+          <el-input v-model="editFrom.detailedAddress" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="邮编" label-width="20%">
+          <el-input v-model="editFrom.email" autocomplete="off"></el-input>
+        </el-form-item>
+        <el-form-item label="所在单位" label-width="20%">
+          <el-input v-model="editFrom.localCompany" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
         <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button type="primary" @click="edit">确 定</el-button>
       </div>
     </el-dialog>
   </div>
@@ -192,49 +204,23 @@ export default {
         input: ''
       },
       editFrom: {
-        name: '',
+        card: '',
+        password: '',
+        createTime: '',
+        company: '',
+        statue: '',
+        subscribeTime: '',
+        user: '',
+        phone: '',
+        localCompany: '',
+        detailedAddress:'',
         address: '',
+        email: ''
       },
-      tableData: [
-        {
-          card: '1111',
-          password: 'abc',
-          createTime: '2020/7',
-          company: '华东政法大学',
-          statue: '未订阅',
-          subscribeTime: '2020/7',
-          user: 'huchaoqun',
-          phone: '10086',
-          localCompany: '上海市民政局',
-          address: '安徽',
-          email: '246500'
-        }, {
-          card: '1111',
-          password: 'abc',
-          createTime: '2020/7',
-          company: '上海市审计局',
-          statue: '未订阅',
-          subscribeTime: '2020/7',
-          user: 'huchaoqun',
-          phone: '10086',
-          localCompany: '上海市民政局',
-          address: '安徽',
-          email: '246500'
-        }, {
-          card: '1111',
-          password: 'abc',
-          createTime: '2020/7',
-          company: '华东政法大学',
-          statue: '已订阅',
-          subscribeTime: '2020/7',
-          user: 'huchaoqun',
-          phone: '10086',
-          localCompany: '上海市民政局',
-          address: '安徽',
-          email: '246500'
-        }],
+      editId:'',
+      tableData: [],
       multipleSelection: [],
-      currentPage: 4,
+      currentPage: 1,
       dialogFormVisible: false,
       pickerOptions: {
         disabledDate(time) {
@@ -264,7 +250,7 @@ export default {
     }
   },
   created() {
-
+this.select()
   },
   mounted() {
 
@@ -279,6 +265,7 @@ export default {
     deleteRow(index, rows) {
       this.dialogFormVisible = true
       this.editFrom = rows[index]
+      this.editId=index
     },
     toggleSelection(rows) {
       if (rows) {
@@ -297,20 +284,61 @@ export default {
 
     //查询
     select() {
-      console.log('查询')
+      this.tableData=[{
+        card: '1111',
+        password: 'abc',
+        createTime: '2020/7',
+        company: '华东政法大学',
+        statue: '未订阅',
+        subscribeTime: '2020/7',
+        user: 'huchaoqun',
+        phone: '10086',
+        localCompany: '上海市民政局',
+        address: '政法委-宝山区',
+        email: '246500'
+      },
+        {
+          card: '1111',
+          password: 'abc',
+          createTime: '2020/7',
+          company: '上海市审计局',
+          statue: '未订阅',
+          subscribeTime: '2020/7',
+          user: 'huchaoqun',
+          phone: '10086',
+          localCompany: '上海市民政局',
+          address: '政法委-浦东新区',
+          email: '246500'
+        },
+        {
+          card: '1111',
+          password: 'abc',
+          createTime: '2020/7',
+          company: '华东政法大学',
+          statue: '已订阅',
+          subscribeTime: '2020/7',
+          user: 'huchaoqun',
+          phone: '10086',
+          localCompany: '上海市民政局',
+          address: '政法委-黄浦区',
+          email: '246500'
+        }]
       this.tableData=this.tableData.filter(item=>{
         if((!this.from.isSubscribe || item.statue===this.from.isSubscribe) &&
             (!this.from.createTime || item.createTime===this.from.createTime) &&
             (!this.from.company || item.company===this.from.company) &&
-        (!this.from.place || item.place===this.from.place)){
-          console.log(true)
+        (!this.from.place || item.address===this.from.place)){
           return true
         }else{
-          console.log(false)
           return false
         }
       })
-      console.log(this.tableData)
+    },
+
+    //修改
+    edit(){
+      this.tableData[this.editId]=this.editFrom
+      this.dialogFormVisible=false
     },
 
     handleSelectionChange(val) {

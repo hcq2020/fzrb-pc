@@ -1,6 +1,6 @@
 <template>
   <div id="app">
-    <hander></hander>
+    <hander  v-show="$route.path!=='/login'"></hander>
  <router-view></router-view>
   </div>
 </template>
@@ -24,9 +24,11 @@ export default {
   width: 100%;
   height: 100%;
 }
+
 html,body{
   font-size: 16px;
 }
+
 </style>
 
 

@@ -4,8 +4,8 @@
       <el-tab-pane label="订阅管理中心" name="first"></el-tab-pane>
       <el-tab-pane label="批量生成订阅卡" name="second"></el-tab-pane>
     </el-tabs>
-    <create v-show="selectId"></create>
-    <manege v-show="!selectId"></manege>
+    <create v-show="!selectId"></create>
+    <manege :change="key" v-show="selectId"></manege>
   </div>
 </template>
 
@@ -14,8 +14,9 @@ export default {
 name: "home",
   data(){
   return{
-    activeName: 'second',
-    selectId:true
+    activeName: 'first',
+    selectId:true,
+    key:1
   }
   },
   components:{
@@ -32,6 +33,7 @@ name: "home",
     handleClick(tab, event) {
       console.log(tab, event);
       this.selectId=!this.selectId
+      this.key++
     }
   }
 }
@@ -40,7 +42,9 @@ name: "home",
 <style lang="scss" scoped>
 .page{
   margin: 2.5rem;
+  height: 48.5rem;
   box-sizing: border-box;
+  overflow-y: hidden;
   padding: 1.18rem;
   background: white;
   box-shadow: 0rem 0rem 1rem rgba(0, 0, 0, 0.02);

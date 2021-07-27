@@ -8,11 +8,32 @@
             <span>{{ user }}</span>
           </span>
         <el-dropdown-menu slot="dropdown">
-          <el-dropdown-item @click.native="back">切换账号</el-dropdown-item>
+          <el-dropdown-item @click.native="dialogFormVisible=true">修改密码</el-dropdown-item>
           <el-dropdown-item @click.native="back">退出登录</el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
     </span>
+    <el-dialog  title="修改密码" width="30%" :visible.sync="dialogFormVisible">
+      <div>
+        密码必须有8-12位英文字母、数字或特殊字符组成（不允许
+        有空格），且字母、数字和特殊符号至少包含两种。
+      </div>
+      <el-form :model="editFrom">
+        <el-form-item label="旧密码" label-width="20%">
+          <el-input v-model="editFrom.oldPasswoed"  autocomplete="off" placeholder="请输入"></el-input>
+        </el-form-item>
+        <el-form-item label="新密码" label-width="20%">
+          <el-input v-model="editFrom.newPassword" autocomplete="off" placeholder="请输入"></el-input>
+        </el-form-item>
+        <el-form-item label="确认密码" label-width="20%">
+          <el-input v-model="editFrom.nextPassword" autocomplete="off" placeholder="请输入"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -22,7 +43,13 @@ export default {
   data() {
     return {
       img: 'img/touxiang.png',
-      user: '张晓宇'
+      user: '张晓宇',
+      dialogFormVisible:false,
+      editFrom:{
+        oldPasswoed:'',
+        newPassword:'',
+        nextPassword:''
+      }
     }
   },
   created() {
@@ -33,7 +60,7 @@ export default {
   },
   methods: {
     back() {
-
+this.$router.push("/login")
     }
   }
 }

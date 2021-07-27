@@ -1,28 +1,32 @@
 <template>
   <div id="app">
-    <img alt="Vue logo" src="./assets/logo.png">
-    <HelloWorld msg="Welcome to Your Vue.js App"/>
+    <hander></hander>
+ <router-view></router-view>
   </div>
 </template>
 
 <script>
-import HelloWorld from './components/HelloWorld.vue'
-
+import Hander from '@/components/layout/hander'
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    Hander
   }
 }
 </script>
 
-<style>
+<style lang="scss">
+@import './src/assets/style/base';
+@import 'public/static/style';
+
 #app {
-  font-family: Avenir, Helvetica, Arial, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  text-align: center;
-  color: #2c3e50;
-  margin-top: 60px;
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+html,body{
+  font-size: 16px;
 }
 </style>
+
+

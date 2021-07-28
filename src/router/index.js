@@ -7,12 +7,12 @@ Vue.use(VueRouter)
 const routes = [
     {
         path: '/',
-        redirect: '/home',
+        redirect: '/login',
     },
     {
         path: '/home',
         name: 'Home',
-        meta: { menu1: '/home' },
+        meta: { title: '首页' },
         component: () => import('../page/home.vue'),
     },
     {
@@ -20,7 +20,8 @@ const routes = [
         name: 'Login',
         component: () => import('../page/login.vue'),
         meta: {
-            keepAlive: false
+            keepAlive: false,
+            title:'登录'
         }
     }
     ]
@@ -29,6 +30,10 @@ const router = new VueRouter({
     routes
 })
 
+router.beforeEach((to,from,next)=>{
+    document.title ="法治日报定向订阅管理系统·"+to.meta.title
+    next()
+})
 
 /*router.beforeEach((to,from,next)=>{
     // to要跳转到的路径

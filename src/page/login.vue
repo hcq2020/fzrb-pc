@@ -1,31 +1,147 @@
 <template>
-<div>欢迎{{userName}}</div>
+  <div class="page">
+    <div class="content">
+      <div class="title">
+        法治日报定向订阅管理系统
+      </div>
+      <div class="login">
+        <div class="font_bule">欢迎登录</div>
+        <div class="mtb5">
+          <el-input v-model="userName" placeholder="请输入账号">
+            <i slot="prefix" class="el-input__icon my-icon-user-solid"></i>
+          </el-input>
+          <el-input class="mt2" v-model="passWord" type="password" placeholder="请输入密码" show-password>
+            <i slot="prefix" class="el-input__icon my-icon-pasw-solid"></i>
+          </el-input>
+        </div>
+        <div class="bt" @click="login">立即登录>>></div>
+      </div>
+    </div>
+  </div>
 </template>
 
 <script>
 export default {
-name: "Login",
-  data(){
-  //定义变量
-  return{
-    userName:'aaa'
-  }
+  name: "Login",
+  data() {
+    //定义变量
+    return {
+      userName: '',
+      passWord: '',
+    }
   },
   created() {
-  //组件创建时执行函数
+    //组件创建时执行函数
 
   },
   mounted() {
     //实例被挂载
 
   },
-  methods:{
-  //自定义方法放在这里
+  methods: {
+    login() {
+      this.$router.push('/home')
+    }
 
   },
 }
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
+.page {
+  height: 100%;
+  width: 100%;
+  background: linear-gradient(180deg, #7DB9FF 0%, #1345FF 100%);
+
+  .content {
+    height: 100%;
+    width: 100%;
+    background-image: url("../assets/image/login_bg.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+    box-sizing: border-box;
+    padding: 5.19rem 18.75rem;
+    text-align: center;
+
+    .title {
+      font-size: 3.5rem;
+      font-family: Microsoft YaHei;
+      font-weight: bold;
+      line-height: 4.63rem;
+      color: #FFFFFF;
+      text-shadow: 0px 4px 6px rgba(38, 59, 201, 0.45);
+      opacity: 1;
+    }
+
+    .login {
+      margin-top: 7.69rem;
+      float: right;
+      width: 25rem;
+      height: 30rem;
+      text-align: center;
+      box-sizing: border-box;
+      padding: 3.75rem 2.5rem 4.19rem;
+      border-radius: 15px;
+      background: #FFFFFF;
+      opacity: 1;
+
+      .bt {
+        height: 3rem;
+        line-height: 3rem;
+        border-radius: 5px;
+        color: white;
+        font-size: 1.125rem;
+        border: 0px solid rgba(0, 0, 0, 0);
+        background: linear-gradient(180deg, #7DB9FF 0%, #1345FF 100%);
+        cursor: pointer;
+      }
+
+      .font_bule {
+        width: max-content;
+        margin: auto;
+        font-weight: bold;
+        font-size: 1.75rem;
+        padding: 3px;
+        color: #255AFF;
+        border-bottom: 2px solid #255AFF;
+      }
+    }
+  }
+}
+
+.mtb5 {
+  margin: 5rem 0;
+}
+
+.mt2 {
+  margin-top: 2.5rem;
+}
+
+
+</style>
+<style>
+.my-icon-user-solid {
+  background-size: contain;
+  background-image: url("../assets/image/user.png");
+  background-repeat: no-repeat;
+}
+
+.my-icon-user-solid:before {
+  content: "替";
+  font-size: 22px;
+  visibility: hidden;
+}
+
+.my-icon-pasw-solid {
+  background-size: contain;
+  background-image: url("../assets/image/pasw.png");
+  background-repeat: no-repeat;
+}
+
+.my-icon-pasw-solid:before {
+  content: "替";
+  font-size: 22px;
+  visibility: hidden;
+}
 
 </style>

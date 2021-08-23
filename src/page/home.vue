@@ -96,10 +96,22 @@ name: "home",
 
 .el-dialog__body{
   margin: 30px auto;
-  width: 22rem;
+  padding: 0 20px;
+  width: 24rem;
 .el-input{
   width: 240px;
 }
 }
 
+.el-form-item__label{
+  width: 30% !important;
+}
+.el-form-item__content{
+  margin-left: 30% !important;
+  width: fit-content !important;
+}
+
+.el-dialog__footer{
+text-align: center !important;
+}
 </style>

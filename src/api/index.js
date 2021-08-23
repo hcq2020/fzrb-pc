@@ -75,7 +75,7 @@ export function exportCard(data){
 //修改订阅人信息
 export function setSubscriber(data){
     return http({
-        url: '/subscriber',
+        url: '/subscriber/subscriber/admin',
         method: 'put',
         data:data,
     })

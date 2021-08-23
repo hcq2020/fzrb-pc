@@ -129,5 +129,6 @@ export default {
   font-size: 12px;
   line-height: 16px;
   color: #255AFF;
+  margin: 30px 0 30px 0;
 }
 </style>

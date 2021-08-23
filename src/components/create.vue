@@ -2,16 +2,16 @@
   <div class="content">
     <div class="df">
       <div>
-        <el-input v-model="from.num" type="number" min="0" max="20000" placeholder="请输入生成条数"></el-input>
+        <el-input v-model.number="from.num" min="0" max="20000" placeholder="请输入生成条数"></el-input>
       </div>
       <div class="mar18" >
-        <el-select v-model="from.company"  slot="prepend" placeholder="请选择派发单位">
-          <el-option v-for="item in companyOption" :label="item" :value="item" :key="item"></el-option>
+        <el-select v-model="from.unitId"  slot="prepend" placeholder="请选择派发单位">
+          <el-option v-for="item in companyOption" :label="item.unitName" :value="item.id" :key="item.id"></el-option>
           <el-option label="+添加派发单位" value="0" @click.native.capture.stop="dialogFormVisible=true" style="color: red"></el-option>
         </el-select>
       </div>
       <div>
-        <el-button type="primary" @click="generate(from.num)">生成</el-button>
+        <el-button type="primary" @click="generate()">生成</el-button>
         <el-button @click="reset">重置</el-button>
       </div>
       <div class="f1">
@@ -32,15 +32,15 @@
             width="150">
         </el-table-column>
         <el-table-column
-            prop="cardId"
+            prop="cardNo"
             label="卡号">
         </el-table-column>
         <el-table-column
-            prop="password"
+            prop="cardPassword"
             label="密码">
         </el-table-column>
         <el-table-column
-            prop="company"
+            prop="unitName"
             label="派发单位"
             show-overflow-tooltip>
         </el-table-column>
@@ -62,6 +62,7 @@
 
 <script>
 import XLSX from 'xlsx';
+import {batchGeneration, batchSaveDistributionUnit, exportCard, getunitDistributionUnitList, saveCard} from "@/api";
 export default {
   name: "create",
   data(){
@@ -96,7 +97,7 @@ export default {
         '上海市审计局',
         '上海市民政局'],
       from:{
-        company:'',
+        unitId:'',
         num:''
       },
       addFrom:{
@@ -114,7 +115,7 @@ export default {
 
   },
   mounted() {
-
+this.getPlace()
   },
   methods:{
     handleSizeChange(val) {
@@ -140,30 +141,50 @@ export default {
       this.multipleSelection = val;
     },
 
+    getPlace(){
+      getunitDistributionUnitList().then(res=>{
+        if(res.data.code==200){
+          this.companyOption=res.data.data
+        }else{
+          this.$message.error(res.data.message)
+        }
+      })
+    },
+
     //生成
-    generate(num){
-      if(this.from.num>0 && this.from.company!==''){
-        this.generateCard(num)
+    generate(){
+      if(this.from.num>0 && this.from.unitId!==''){
+        batchGeneration(this.from).then(res=>{
+          if(res.data.code==200){
+            res.data.data.forEach(item=>{
+             item.unitName=this.getCompanyById(item.unitId)
+              saveCard({
+                cardNo:item.cardNo,
+                cardPassword: item.cardPassword,
+                unitId: item.unitId
+              }).then(res=>{
+console.log(res)
+              })
+            })
+            this.tableData=res.data.data
+
+          }else{
+            this.$message.error(res.data.message)
+          }
+        })
       }
     },
-    generateCard(num){
-      let obj={
-        cardId:'',
-        password:'',
-        company:''
+
+
+    getCompanyById(id){
+      for (const argumentsKey in this.companyOption) {
+        if(this.companyOption[argumentsKey].id==id){
+          return this.companyOption[argumentsKey].unitName
+        }
       }
-      for(let i=0;i<8;i++){
-        obj.cardId+=(Math.floor(Math.random()*10))
-      }
-      for(let i=0;i<6;i++){
-        obj.password+=(Math.floor(Math.random()*10))
-      }
-    //  obj.company=this.companyOption[Math.floor(Math.random()*this.companyOption.length)]
-      obj.company=this.from.company
-      this.tableData.push(obj)
-      if(--num>0)
-        return this.generateCard(num)
     },
+
+
     //重置
     reset(){
       this.tableData=[]
@@ -174,7 +195,20 @@ export default {
     addCompany(){
 if(this.addFrom.name!==''){
   this.companyOption.push(this.addFrom.name)
-  this.dialogFormVisible=false
+  batchSaveDistributionUnit([
+    {
+      unitName: this.addFrom.name
+    }
+  ]).then(res=>{
+    if (res.data.code==200){
+      this.dialogFormVisible=false
+      console.log(res)
+      this.getPlace()
+    }else {
+      this.$message.warning(res.data.message)
+    }
+  })
+
 }else{
   this.$message.warning('请输入新增派发单位！')
 }
@@ -186,18 +220,53 @@ if(this.addFrom.name!==''){
       const keys = ['序号', '卡号', '密码', '派发单位'];
       exel.push(keys)
       this.tableData.forEach((item,index)=>{
-        exel.push([index+1,...Object.values(item)])
+        exel.push([index+1,item.cardNo,item.cardPassword,item.unitName])
       })
       this.exel = exel
     },
 
     // 点击导出Exel
     exported() {
+      let ids=[]
+      this.tableData.forEach(item => {
+        ids.push(item.id)
+      })
+      var day2 = new Date();
+      day2.setTime(day2.getTime());
+      var s2 = day2.getFullYear()+"-" + (day2.getMonth()+1) + "-" + day2.getDate();
+      exportCard(ids).then( response  => {
+            console.log(response)
+            this.downLoadXls(response.data,s2+this.exel[1][3]+".xlsx")
+          }
+      )
+
+
       this.initExportData()
       const ws = XLSX.utils.aoa_to_sheet(this.exel);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "SheetJS");
-      XLSX.writeFile(wb, "订阅卡信息.xlsx")
+
+   //   XLSX.writeFile(wb, s2+this.exel[1][3]+".xlsx")
+    },
+
+    downLoadXls(data, filename) {
+      //接收的是blob，若接收的是文件流，需要转化一下
+      var blob = new Blob([data], {type: 'application/vnd.ms-excel'})
+      if (typeof window.chrome !== 'undefined') {
+        // Chrome version
+        var link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+      } else if (typeof window.navigator.msSaveBlob !== 'undefined') {
+        // IE version
+        let blob1 = new Blob([data], { type: 'application/force-download' });
+        window.navigator.msSaveBlob(blob1, filename);
+      } else {
+        // Firefox version
+        var file = new File([data], filename, { type: 'application/force-download' });
+        window.open(URL.createObjectURL(file));
+      }
     },
   }
 }

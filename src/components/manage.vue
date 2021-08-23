@@ -2,27 +2,28 @@
   <div class="content">
     <div class="df">
       <div>
-        <el-select v-model="from.isSubscribe" slot="prepend" placeholder="请选择订阅状态">
-          <el-option label="已订阅" value="已订阅"></el-option>
-          <el-option label="未订阅" value="未订阅"></el-option>
+        <el-select v-model="from.bind" slot="prepend" placeholder="请选择订阅状态">
+          <el-option label="已订阅" value="1"></el-option>
+          <el-option label="未订阅" value="0"></el-option>
         </el-select>
       </div>
       <div class="mar18">
         <el-date-picker
-            v-model="from.createTime"
+            v-model="from.createDate"
             align="right"
             type="date"
+            value-format="yyyy-MM-dd"
             placeholder="选择日期"
             :picker-options="pickerOptions">
         </el-date-picker>
       </div>
       <div>
-        <el-select v-model="from.company" slot="prepend" placeholder="请选择派发单位">
-          <el-option v-for="item in companyOption" :label="item" :value="item" :key="item"></el-option>
+        <el-select v-model="from.unitId"  slot="prepend" placeholder="请选择派发单位">
+          <el-option v-for="item in companyOption" :label="item.unitName" :value="item.id" :key="item.id"></el-option>
         </el-select>
       </div>
       <div class="mar18">
-        <el-select v-model="from.place" slot="prepend" placeholder="请选择地区">
+        <el-select v-model="from.area" slot="prepend" placeholder="请选择地区">
           <el-option v-for="item in placeOption" :label="item" :value="item" :key="item"></el-option>
         </el-select>
       </div>
@@ -54,41 +55,46 @@
             type="index">
         </el-table-column>
         <el-table-column
-            prop="card"
+            prop="cardNo"
             label="卡号"
             width="120">
         </el-table-column>
         <el-table-column
-            prop="password"
+            prop="cardPassword"
             label="密码"
             width="120">
         </el-table-column>
         <el-table-column
-            prop="createTime"
+            prop="createDate"
             label="建卡日期">
         </el-table-column>
         <el-table-column
-            prop="company"
+            prop="unitName"
             label="派发单位">
         </el-table-column>
         <el-table-column
-            prop="statue"
+            prop="bind"
             label="订阅状态">
+          <template slot-scope="scope">
+            <span>
+              {{scope.row.bind==0?'未订阅':'已订阅'}}
+            </span>
+          </template>
         </el-table-column>
         <el-table-column
-            prop="subscribeTime"
+            prop="createTime"
             label="订阅日期">
         </el-table-column>
         <el-table-column
-            prop="user"
+            prop="contact"
             label="个人/单位">
         </el-table-column>
         <el-table-column
-            prop="phone"
+            prop="postCode"
             label="电话">
         </el-table-column>
         <el-table-column
-            prop="localCompany"
+            prop="unit"
             label="所在单位">
         </el-table-column>
         <el-table-column
@@ -108,6 +114,7 @@
             <el-button
                 @click.native.prevent="deleteRow(scope.$index, tableData)"
                 type="text"
+                :disabled="!scope.row.pid?true:false"
                 size="small">
               修改
             </el-button>
@@ -119,35 +126,36 @@
       <el-pagination
           @size-change="handleSizeChange"
           @current-change="handleCurrentChange"
-          :current-page="currentPage"
+          :current-page="from.pageNo"
+          pager-count="5"
           :page-sizes="[5, 10, 20, 50]"
-          :page-size="100"
+          :page-size="from.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
-          :total="tableData.length">
+          :total="total">
       </el-pagination>
     </div>
     <el-dialog id="dialog" title="修改订阅信息" width="30%" :visible.sync="dialogFormVisible">
       <el-form :model="editFrom">
         <el-form-item label="个人/单位" label-width="20%">
-          <el-input v-model="editFrom.user" autocomplete="off"></el-input>
+          <el-input v-model="editFrom.contact" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="联系方式" label-width="20%">
-          <el-input v-model="editFrom.phone" autocomplete="off"></el-input>
+          <el-input v-model="editFrom.postCode" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="派发单位" label-width="20%">
-          <el-input v-model="editFrom.company" autocomplete="off"></el-input>
+          <el-input v-model="editFrom.unitName" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="所在地区" label-width="20%">
           <el-input v-model="editFrom.address" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="详细地址" label-width="20%">
-          <el-input v-model="editFrom.detailedAddress" autocomplete="off"></el-input>
+          <el-input v-model="editFrom.address" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="邮编" label-width="20%">
           <el-input v-model="editFrom.email" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="所在单位" label-width="20%">
-          <el-input v-model="editFrom.localCompany" autocomplete="off"></el-input>
+          <el-input v-model="editFrom.unit" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -160,51 +168,34 @@
 
 <script>
 import XLSX from "xlsx";
+import {
+  exportSubscriberCardList,
+  getDistributionUnitList,
+  getunitDistributionUnitList,
+  setSubscriber,
+  subscriberCardList
+} from "@/api";
 
 export default {
   name: "manage",
   props: ['change'],
   data() {
     return {
-      companyOption: [
-        '武警',
-        '华东政法大学',
-        '司鉴院',
-        '民防',
-        '上海市审计局',
-        '上海市民政局'],
-      placeOption: [
-        "政法委-浦东新区",
-        "政法委-黄浦区",
-        "政法委-徐汇区",
-        '政法委-长宁区',
-        '政法委-静安区',
-        '政法委-普陀区',
-        '政法委-虹口区',
-        '政法委-杨浦区',
-        '政法委-宝山区',
-        '政法委-闵行区',
-        '政法委-嘉定区',
-        '政法委-青浦区',
-        '政法委-松江区',
-        '政法委-金山区',
-        '政法委-奉贤区',
-        '政法委-崇明县区',
-        '政法委-市级机关',
-        '政法委-市戒毒局',
-        '政法委-市委宣传部',
-        '政法委-浦东机场',
-        '政法委-法学会',
-        '政法委-上海市公安局'],
+      companyOption: [],
+      placeOption: [],
+      total:'',
       from: {
-        isSubscribe: '',
-        createTime: '',
-        company: '',
-        place: '',
-        input: ''
+        area:'',
+        bind:'',
+        createDate:'',
+        keyWord:'',
+        pageNo:1,
+        pageSize:10,
+        unitId:'',
+        street:''
       },
       editFrom: {
-        card: '',
+       /* card: '',
         password: '',
         createTime: '',
         company: '',
@@ -215,7 +206,7 @@ export default {
         localCompany: '',
         detailedAddress:'',
         address: '',
-        email: ''
+        email: ''*/
       },
       editId:'',
       tableData: [],
@@ -251,20 +242,24 @@ export default {
   },
   created() {
 this.select()
+    this.getPlace()
+    this.getArea()
   },
   mounted() {
 
   },
   methods: {
     handleSizeChange(val) {
-      console.log(`每页 ${val} 条`);
+      this.from.pageSize=val
+      this.select()
     },
     handleCurrentChange(val) {
-      console.log(`当前页: ${val}`);
+      this.from.pageNo=val
+      this.select()
     },
     deleteRow(index, rows) {
       this.dialogFormVisible = true
-      this.editFrom = rows[index]
+      this.editFrom ={...rows[index]}
       this.editId=index
     },
     toggleSelection(rows) {
@@ -279,66 +274,63 @@ this.select()
 
     //清除
     clearInfo() {
-      Object.keys(this.from).forEach(key=>{this.from[key]=''})
+    //  Object.keys(this.from).forEach(key=>{this.from[key]=''})
+      this.from={
+        area:'',
+            bind:'',
+            createDate:'',
+            keyWord:'',
+            pageNo:1,
+            pageSize:10,
+            unitId:''
+      }
+      this.select()
     },
 
     //查询
     select() {
-      this.tableData=[{
-        card: '1111',
-        password: 'abc',
-        createTime: '2020/7',
-        company: '华东政法大学',
-        statue: '未订阅',
-        subscribeTime: '2020/7',
-        user: 'huchaoqun',
-        phone: '10086',
-        localCompany: '上海市民政局',
-        address: '政法委-宝山区',
-        email: '246500'
-      },
-        {
-          card: '1111',
-          password: 'abc',
-          createTime: '2020/7',
-          company: '上海市审计局',
-          statue: '未订阅',
-          subscribeTime: '2020/7',
-          user: 'huchaoqun',
-          phone: '10086',
-          localCompany: '上海市民政局',
-          address: '政法委-浦东新区',
-          email: '246500'
-        },
-        {
-          card: '1111',
-          password: 'abc',
-          createTime: '2020/7',
-          company: '华东政法大学',
-          statue: '已订阅',
-          subscribeTime: '2020/7',
-          user: 'huchaoqun',
-          phone: '10086',
-          localCompany: '上海市民政局',
-          address: '政法委-黄浦区',
-          email: '246500'
-        }]
-      this.tableData=this.tableData.filter(item=>{
-        if((!this.from.isSubscribe || item.statue===this.from.isSubscribe) &&
-            (!this.from.createTime || item.createTime===this.from.createTime) &&
-            (!this.from.company || item.company===this.from.company) &&
-        (!this.from.place || item.address===this.from.place)){
-          return true
+      this.getData()
+    },
+
+    getPlace(){
+      getunitDistributionUnitList().then(res=>{
+        if(res.data.code==200){
+          this.companyOption=res.data.data
         }else{
-          return false
+          this.$message.error(res.data.message)
         }
       })
     },
 
+    getArea(){
+      getDistributionUnitList().then(res=>{
+        if(res.data.code==200){
+          this.placeOption=res.data.data
+        }
+      })
+    },
+
+    getData(){
+      subscriberCardList(this.from).then(res=>{
+        console.log(res)
+        this.tableData=res.data.data.rows
+        this.total=res.data.data.total
+      })
+    },
+
+
     //修改
     edit(){
       this.tableData[this.editId]=this.editFrom
-      this.dialogFormVisible=false
+      setSubscriber(this.editFrom).then(res=>{
+        if(res.data.code==200){
+          this.dialogFormVisible=false
+          this.select()
+        }else{
+          this.$message.error(res.data.message)
+        }
+      })
+
     },
 
     handleSelectionChange(val) {
@@ -357,12 +349,43 @@ this.select()
 
     // 点击导出Exel
     exported() {
+      let ids=[]
+      this.tableData.forEach(item => {
+        ids.push(item.id)
+      })
+
+      exportSubscriberCardList(this.from).then( response  => {
+        console.log(response)
+        this.downLoadXls(response.data,'订阅卡信息.xlsx')
+          }
+      )
+
       this.initExportData()
-      const ws = XLSX.utils.aoa_to_sheet(this.exel);
+     const ws = XLSX.utils.aoa_to_sheet(this.exel);
       const wb = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(wb, ws, "SheetJS");
-      XLSX.writeFile(wb, "订阅卡信息.xlsx")
+     // XLSX.writeFile(wb, "订阅卡信息.xlsx")
     },
+
+    downLoadXls(data, filename) {
+      //接收的是blob，若接收的是文件流，需要转化一下
+  var blob = new Blob([data], {type: 'application/vnd.ms-excel'})
+  if (typeof window.chrome !== 'undefined') {
+    // Chrome version
+    var link = document.createElement('a');
+    link.href = window.URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+  } else if (typeof window.navigator.msSaveBlob !== 'undefined') {
+    // IE version
+    let blob1 = new Blob([data], { type: 'application/force-download' });
+    window.navigator.msSaveBlob(blob1, filename);
+  } else {
+    // Firefox version
+    var file = new File([data], filename, { type: 'application/force-download' });
+    window.open(URL.createObjectURL(file));
+  }
+},
   }
 }
 </script>

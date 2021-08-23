@@ -21,6 +21,9 @@
 </template>
 
 <script>
+
+import {login} from '../api/index'
+
 export default {
   name: "Login",
   data() {
@@ -40,7 +43,19 @@ export default {
   },
   methods: {
     login() {
-      this.$router.push('/home')
+      let data={
+        password: this.passWord,
+        rememberMe: true,
+        userName: this.userName
+      }
+      login(data).then(res=>{
+        if(res.data.code===200){
+          localStorage.setItem('token',res.data.data.token)
+          this.$router.push('/home')
+        }else{
+          this.$message.error("账号不存在，或密码错误！")
+        }
+      })
     }
 
   },

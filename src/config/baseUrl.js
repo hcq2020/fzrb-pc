@@ -1,4 +1,4 @@
-const baseUrl = 'http://49.233.129.207:8084/api';
+const baseUrl = '/api';
 export {baseUrl}
 
 

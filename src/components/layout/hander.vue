@@ -20,24 +20,26 @@
       </div>
       <el-form :model="editFrom">
         <el-form-item label="旧密码" label-width="20%">
-          <el-input v-model="editFrom.oldPasswoed"  autocomplete="off" placeholder="请输入"></el-input>
+          <el-input v-model="editFrom.old_password"  autocomplete="off" placeholder="请输入"></el-input>
         </el-form-item>
         <el-form-item label="新密码" label-width="20%">
-          <el-input v-model="editFrom.newPassword" autocomplete="off" placeholder="请输入"></el-input>
+          <el-input v-model="editFrom.password" autocomplete="off" placeholder="请输入"></el-input>
         </el-form-item>
         <el-form-item label="确认密码" label-width="20%">
-          <el-input v-model="editFrom.nextPassword" autocomplete="off" placeholder="请输入"></el-input>
+          <el-input v-model="editFrom.confirm_password" autocomplete="off" placeholder="请输入"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
-        <el-button @click="dialogFormVisible = false">取 消</el-button>
-        <el-button type="primary" @click="dialogFormVisible = false">确 定</el-button>
+        <el-button @click="cancel">取 消</el-button>
+        <el-button type="primary" @click="setPassword">确 定</el-button>
       </div>
     </el-dialog>
   </div>
 </template>
 
 <script>
+import {changePassword, logout} from "@/api";
+
 export default {
   name: "hander",
   data() {
@@ -46,9 +48,9 @@ export default {
       user: '张晓宇',
       dialogFormVisible:false,
       editFrom:{
-        oldPasswoed:'',
-        newPassword:'',
-        nextPassword:''
+        confirm_password: "",
+        old_password: "",
+        password: ""
       }
     }
   },
@@ -60,7 +62,30 @@ export default {
   },
   methods: {
     back() {
-this.$router.push("/login")
+      logout().then(res=>{
+        if(res.data.code==200){
+          this.$router.push("/login")
+        }
+      })
+    },
+
+    cancel(){
+      this.dialogFormVisible=false
+      Object.keys(this.editFrom).forEach(key=>{this.editFrom[key]=''})
+
+    },
+
+    setPassword(){
+      changePassword(this.editFrom).then(res=>{
+        if(res.data.message=='密码修改成功'){
+          this.dialogFormVisible=false
+          this.$message.success("修改成功！")
+          localStorage.removeItem('token')
+          this.$router.push("/login")
+        }else{
+          this.$message.error(res.data.message)
+        }
+      })
     }
   }
 }

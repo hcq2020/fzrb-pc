@@ -56,13 +56,11 @@
         </el-table-column>
         <el-table-column
             prop="cardNo"
-            label="卡号"
-            width="120">
+            label="卡号">
         </el-table-column>
         <el-table-column
             prop="cardPassword"
-            label="密码"
-            width="120">
+            label="密码">
         </el-table-column>
         <el-table-column
             prop="createDate"
@@ -108,8 +106,7 @@
         </el-table-column>
         <el-table-column
             fixed="right"
-            label="操作"
-            width="120">
+            label="操作">
           <template slot-scope="scope">
             <el-button
                 @click.native.prevent="deleteRow(scope.$index, tableData)"
@@ -134,21 +131,25 @@
           :total="total">
       </el-pagination>
     </div>
-    <el-dialog id="dialog" title="修改订阅信息" width="30%" :visible.sync="dialogFormVisible">
-      <el-form :model="editFrom">
-        <el-form-item label="个人/单位" label-width="20%">
+    <el-dialog id="dialog" title="修改订阅信息" width="600px" :visible.sync="dialogFormVisible">
+      <el-form :model="editFrom" :rules="rules">
+        <el-form-item label="个人/单位" label-width="20%" prop="contact">
           <el-input v-model="editFrom.contact" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="联系方式" label-width="20%">
+        <el-form-item label="联系方式" label-width="20%" prop="postCode">
           <el-input v-model="editFrom.postCode" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="派发单位" label-width="20%">
-          <el-input v-model="editFrom.unitName" autocomplete="off"></el-input>
+        <el-form-item label="派发单位" label-width="20%" prop="companyOption">
+          <div>
+            <el-select v-model="editFrom.unitName"  slot="prepend" placeholder="请选择派发单位">
+              <el-option v-for="item in companyOption" :label="item.unitName" :value="item.unitName" :key="item.id"></el-option>
+            </el-select>
+          </div>
         </el-form-item>
-        <el-form-item label="所在地区" label-width="20%">
+        <el-form-item label="所在地区" label-width="20%" prop="address">
           <el-input v-model="editFrom.address" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item label="详细地址" label-width="20%">
+        <el-form-item label="详细地址" label-width="20%" prop="address">
           <el-input v-model="editFrom.address" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="邮编" label-width="20%">
@@ -195,18 +196,6 @@ export default {
         street:''
       },
       editFrom: {
-       /* card: '',
-        password: '',
-        createTime: '',
-        company: '',
-        statue: '',
-        subscribeTime: '',
-        user: '',
-        phone: '',
-        localCompany: '',
-        detailedAddress:'',
-        address: '',
-        email: ''*/
       },
       editId:'',
       tableData: [],
@@ -238,6 +227,21 @@ export default {
           }
         }]
       },
+      rules: {
+        contact: [
+          { required: true, message: '收货人姓名需要在2-25个汉字或字符之间，不能包含特殊字符。', trigger: 'blur' },
+          { min: 2, max: 25, message: '收货人姓名需要在2-25个汉字或字符之间，不能包含特殊字符。', trigger: 'blur' }
+        ],
+        postCode: [
+          { required: true, message: '手机号码格式不正确', trigger: 'blur' }
+        ],
+        unitName: [
+          { required: true, message: '请选择派发单位', trigger: 'blur' }
+        ],
+        address: [
+          { required: true, message: '详细地址不能为空', trigger: 'blur' }
+        ],
+      }
     }
   },
   created() {
@@ -395,10 +399,46 @@ this.select()
   width: 100%;
   height: 100%;
 
+  .el-table{
+    border: 1px solid #E8E8E8;
+  }
+
+
+
   #dialog {
     .el-select {
       width: 100%;
     }
   }
 }
+/deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar {
+  width: 0!important;
+  display: none !important;
+}
+/deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar-track {
+  width: 0!important;
+  display: none!important;
+}
+/deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar-thumb {
+  width: 0!important;
+  display: none!important;
+}
+
+/deep/ .el-table__body{
+  width: 100% !important;
+}
+/deep/ .el-table th, .el-table tr {
+  background: #F5F6F8;
+  font-size: 14px;
+  font-weight: bold;
+  color: #1F242E;
+}
+
+/deep/ .el-table td.gutter, .el-table th.gutter{
+  display: none;
+}
+/deep/ .el-table__fixed-right-patch{
+  display: none;
+}
+
 </style>

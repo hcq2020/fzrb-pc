@@ -46,7 +46,7 @@
         </el-table-column>
       </el-table>
     </div>
-    <el-dialog  title="添加" width="30%" :visible.sync="dialogFormVisible">
+    <el-dialog  title="添加" width="500px" :visible.sync="dialogFormVisible">
       <el-form :model="addFrom">
         <el-form-item label="派发单位" label-width="20%">
           <el-input v-model="addFrom.name" autocomplete="off"></el-input>
@@ -276,6 +276,40 @@ if(this.addFrom.name!==''){
 .content{
   width: 100%;
   height: 100%;
+
+  .el-table{
+    border: 1px solid #E8E8E8;
+  }
+}
+
+/deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar {
+  width: 0!important;
+  display: none !important;
+}
+/deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar-track {
+  width: 0!important;
+  display: none!important;
+}
+/deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar-thumb {
+  width: 0!important;
+  display: none!important;
+}
+
+/deep/ .el-table__body{
+  width: 100% !important;
+}
+/deep/ .el-table th, .el-table tr {
+  background: #F5F6F8;
+  font-size: 14px;
+  font-weight: bold;
+  color: #1F242E;
+}
+
+/deep/ .el-table td.gutter, .el-table th.gutter{
+  display: none;
+}
+/deep/ .el-table__fixed-right-patch{
+  display: none;
 }
 </style>
 

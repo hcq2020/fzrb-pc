@@ -13,8 +13,8 @@
         </el-dropdown-menu>
       </el-dropdown>
     </span>
-    <el-dialog  title="修改密码" width="30%" :visible.sync="dialogFormVisible">
-      <div>
+    <el-dialog  title="修改密码" width="500px" :visible.sync="dialogFormVisible">
+      <div class="tips">
         密码必须有8-12位英文字母、数字或特殊字符组成（不允许
         有空格），且字母、数字和特殊符号至少包含两种。
       </div>
@@ -123,5 +123,11 @@ export default {
       cursor: pointer;
     }
   }
+}
+
+.tips{
+  font-size: 12px;
+  line-height: 16px;
+  color: #255AFF;
 }
 </style>

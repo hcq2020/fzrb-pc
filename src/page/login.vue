@@ -7,10 +7,10 @@
       <div class="login">
         <div class="font_bule">欢迎登录</div>
         <div class="mtb5">
-          <el-input v-model="userName" placeholder="请输入账号">
+          <el-input v-model="userName" clearable placeholder="请输入账号">
             <i slot="prefix" class="el-input__icon my-icon-user-solid"></i>
           </el-input>
-          <el-input class="mt2" v-model="passWord" type="password" placeholder="请输入密码" show-password>
+          <el-input class="mt2" v-model="passWord" clearable type="password" placeholder="请输入密码" show-password>
             <i slot="prefix" class="el-input__icon my-icon-pasw-solid"></i>
           </el-input>
         </div>
@@ -43,19 +43,26 @@ export default {
   },
   methods: {
     login() {
-      let data={
-        password: this.passWord,
-        rememberMe: true,
-        userName: this.userName
-      }
-      login(data).then(res=>{
-        if(res.data.code===200){
-          localStorage.setItem('token',res.data.data.token)
-          this.$router.push('/home')
-        }else{
-          this.$message.error("账号不存在，或密码错误！")
+      if(this.userName==''){
+        this.$message.warning("请输入账号！")
+      }else if(this.passWord==''){
+        this.$message.warning("请输入密码！")
+      }else{
+        let data={
+          password: this.passWord,
+          rememberMe: true,
+          userName: this.userName
         }
-      })
+        login(data).then(res=>{
+          if(res.data.code===200){
+            localStorage.setItem('token',res.data.data.token)
+            this.$router.push('/home')
+          }else{
+            this.$message.error("账号不存在，或密码错误！")
+          }
+        })
+      }
+
     }
 
   },

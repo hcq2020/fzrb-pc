@@ -120,4 +120,13 @@ export function batchSaveDistributionUnit(data){
 }
 
 
+//修改卡信息
+export function setCard(data){
+    return http({
+        url: '/card/card',
+        method: 'put',
+        data:data,
+    })
+}
+
 

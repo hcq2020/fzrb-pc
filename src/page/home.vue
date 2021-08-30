@@ -113,5 +113,10 @@ name: "home",
 
 .el-dialog__footer{
 text-align: center !important;
+  padding: 10px 20px 50px!important;
+
+  .el-button{
+    padding: 8px 26px;
+  }
 }
 </style>

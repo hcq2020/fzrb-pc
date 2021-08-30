@@ -21,8 +21,9 @@ export default {
 
 #app {
   position: relative;
-  width: 100%;
+  width: 120rem;
   height: 100%;
+  overflow: auto;
 }
 
 html,body{

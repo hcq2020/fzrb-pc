@@ -203,7 +203,7 @@ export default {
             console.log(res)
             this.getPlace()
           } else {
-            this.$message.warning(res.data.message)
+            this.$message.error(res.data.message)
           }
         })
 

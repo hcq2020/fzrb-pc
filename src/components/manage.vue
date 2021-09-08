@@ -1,5 +1,6 @@
 <template>
   <div class="content">
+    <!--查询条件-->
     <div class="df">
       <div>
         <el-select v-model="from.bind" slot="prepend" placeholder="请选择订阅状态">
@@ -11,6 +12,7 @@
         <el-date-picker
             v-model="time"
             type="daterange"
+            unlink-panels
             value-format="yyyy-MM-dd"
             range-separator="-"
             start-placeholder="开始日期"
@@ -20,33 +22,35 @@
         </el-date-picker>
       </div>
       <div>
-        <el-select v-model="from.unitId" slot="prepend" placeholder="请选择派发单位">
-          <el-option v-for="item in companyOption" :label="item.unitName" :value="item.id" :key="item.id"></el-option>
-        </el-select>
+        <el-cascader
+          placeholder="请选择派发单位"
+          v-model="from.unitId"
+          :options="companyOption"
+          @change="changeUnit"
+          filterable></el-cascader>
       </div>
       <div class="mar18">
-        <el-select v-model="from.area" placeholder="请选择地区">
-          <el-option
-              v-for="item in areaOption"
-              :key="item"
-              :label="item"
-              :value="item">
-          </el-option>
-        </el-select>
+        <el-cascader
+            placeholder="请选择地区"
+            v-model="from.area"
+            :options="areaOption"
+            @change="changeArea"
+            filterable></el-cascader>
       </div>
       <div>
-        <el-input v-model="from.input" placeholder="请输入关键词"></el-input>
+        <el-input v-model="from.keyWord" placeholder="请输入关键词"></el-input>
       </div>
-      <div class="ml40" style="min-width: 12rem">
+      <div class="ml40 minw_14">
         <el-button type="primary" @click="select">查询</el-button>
-        <el-button @click="clearInfo">清除</el-button>
+        <el-button @click="clearInfo">重置</el-button>
       </div>
-      <div class="f1" style="min-width: 17rem">
-        <el-button class="f_right" type="primary" :disabled="multipleSelection.length>0?false:true" @click="exported">
+      <div class="f1 minw_17">
+        <el-button class="f_right" type="primary"  @click="exported">
           导出
         </el-button>
       </div>
     </div>
+    <!--数据列表-->
     <div class="table mt18">
       <el-table
           ref="manageTable"
@@ -65,11 +69,6 @@
         </el-table-column>
         <el-table-column
             type="selection">
-        </el-table-column>
-
-        <el-table-column
-            label="ID"
-            type="index">
         </el-table-column>
         <el-table-column
             prop="cardNo"
@@ -117,16 +116,12 @@
             label="地址">
         </el-table-column>
         <el-table-column
-            prop="postCode"
-            label="邮编"
-           >
-        </el-table-column>
-        <el-table-column
             fixed="right"
-            label="操作">
+            label="操作"
+        width="70">
           <template slot-scope="scope">
             <el-button
-                @click.native.prevent="deleteRow(scope.$index, tableData)"
+                @click.native.prevent="editRow(scope.$index, tableData)"
                 type="text"
                 size="small">
               修改
@@ -141,7 +136,7 @@
           @current-change="handleCurrentChange"
           :current-page="from.pageNo"
           :pager-count="5"
-          :page-sizes="[ 10, 20, 50, 100]"
+          :page-sizes="[ 30, 50, 100, 200]"
           :page-size="from.pageSize"
           layout="total, sizes, prev, pager, next, jumper"
           prev-text="上一页"
@@ -149,13 +144,14 @@
           :total="total">
       </el-pagination>
     </div>
+    <!--修改弹窗-->
     <el-dialog id="dialog" title="修改订阅信息" width="600px" :visible.sync="dialogFormVisible" :close-on-click-modal=false>
       <el-form :model="editFrom" ref="editForm" :rules="rules">
         <el-form-item v-show="cardStatus" label="个人/单位" label-width="20%" prop="receiver" >
-          <el-input v-model="editFrom.receiver" autocomplete="off"></el-input>
+          <el-input v-model="editFrom.receiver"  @keyup.native="(e)=>keyup(e,'receiver')" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item v-show="cardStatus" label="联系方式" label-width="20%" prop="contact">
-          <el-input v-model="editFrom.contact" autocomplete="off"></el-input>
+          <el-input v-model="editFrom.contact"  @keyup.native="(e)=>keyup(e,'contact')" autocomplete="off"></el-input>
         </el-form-item>
         <el-form-item label="派发单位" label-width="20%" prop="companyOption">
           <div>
@@ -175,14 +171,14 @@
               filterable>
           </el-cascader>
         </el-form-item>
-        <el-form-item v-show="cardStatus" label="详细地址" label-width="20%" prop="address">
-          <el-input v-model="editFrom.address" autocomplete="off"></el-input>
+        <el-form-item v-show="cardStatus" label="详细地址"  label-width="20%" prop="address">
+          <el-input v-model="editFrom.address" @keyup.native="(e)=>keyup(e,'address')" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item v-show="cardStatus" label="邮编" label-width="20%">
-          <el-input v-model="editFrom.postCode" autocomplete="off"></el-input>
+        <el-form-item v-show="cardStatus" label="邮编"   label-width="20%">
+          <el-input v-model.number="editFrom.postCode" @keyup.native="(e)=>keyup(e,'postCode')" autocomplete="off"></el-input>
         </el-form-item>
-        <el-form-item v-show="cardStatus" label="所在单位" label-width="20%">
-          <el-input v-model="editFrom.unit" autocomplete="off"></el-input>
+        <el-form-item v-show="cardStatus" label="所在单位"  label-width="20%">
+          <el-input v-model="editFrom.unit"  @keyup.native="(e)=>keyup(e,'unit')" autocomplete="off"></el-input>
         </el-form-item>
       </el-form>
       <div slot="footer" class="dialog-footer">
@@ -194,7 +190,7 @@
 </template>
 
 <script>
-import XLSX from "xlsx";
+//import XLSX from "xlsx";
 import {
   exportSubscriberCardList,
   getDistributionUnitList,
@@ -209,6 +205,7 @@ export default {
   name: "manage",
   props: ['change'],
   data() {
+    console.log(citys)
     var validateContact = (rule, value, callback) => {
       if (value === '') {
         callback(new Error('联系方式不能为空'));
@@ -216,6 +213,17 @@ export default {
         const reg = /(^((13[0-9])|(14[5,7])|(15[0-3,5-9])|(17[0,3,5-8])|(18[0-9])|166|198|199|(147))\d{8}$)|(\d{3}-\d{8}|\d{4}-\d{7})/;
         if (!reg.test(value)) {
           callback(new Error('手机号码格式不正确'));
+        }
+        callback();
+      }
+    };
+    var validateReceiver = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('收货人姓名不能为空'));
+      } else {
+        const reg = /^[\u4e00-\u9fa5]{2,25}$/;
+        if (!reg.test(value)) {
+          callback(new Error('收货人姓名需要在2-25个汉字或字符之间，不能包含特殊字符'));
         }
         callback();
       }
@@ -232,7 +240,7 @@ export default {
         toDate:'',
         keyWord: '',
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 30,
         unitId: '',
         street: '',
       },
@@ -262,8 +270,8 @@ export default {
       },
       rules: {
         receiver: [
-          {required: true, message: '收货人姓名需要在2-25个汉字或字符之间，不能包含特殊字符。', trigger: 'blur'},
-          {min: 2, max: 25, message: '收货人姓名需要在2-25个汉字或字符之间，不能包含特殊字符。', trigger: 'blur'}
+          {required: true, message: '收货人姓名不能为空', trigger: 'blur'},
+          {validator:validateReceiver,trigger: 'blur'}
         ],
         contact: [
           {validator:validateContact,trigger: 'blur'},
@@ -283,12 +291,18 @@ export default {
     this.getPlace()
     //   this.getArea()
   },
+  watch:{
+    change(){
+      this.select()
+    }
+  },
   mounted() {
-
     citys.forEach(item=>{
-      this.areaOption.push(item.label)
+      this.areaOption.push({
+        label:item.label,
+        value:item.label
+      })
     })
-    console.log( this.areaOption)
   },
   methods: {
     handleSizeChange(val) {
@@ -299,7 +313,16 @@ export default {
       this.from.pageNo = val
       this.select()
     },
-    deleteRow(index, rows) {
+
+    changeUnit(val){
+     this.from.unitId=val[0]
+    },
+
+    changeArea(val){
+      this.from.area=val[0]
+    },
+    //获取修改行数据
+    editRow(index, rows) {
       this.dialogFormVisible = true
       this.cardStatus=rows[index].pid
       for (let key in rows[index]) {
@@ -308,9 +331,11 @@ export default {
           this.editFrom[key] = rows[index][key];
         }
       }
+      this.editFrom.id = rows[index].pid;
       this.place = [this.editFrom.area, this.editFrom.street]
       this.editId = index
     },
+
     toggleSelection(rows) {
       if (rows) {
         rows.forEach(row => {
@@ -331,7 +356,7 @@ export default {
         toDate:'',
         keyWord: '',
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 30,
         unitId: '',
         street: '',
       }
@@ -345,9 +370,14 @@ export default {
       this.getData()
     },
 
+    //获取派发单位列表
     getPlace() {
       getunitDistributionUnitList().then(res => {
         if (res.data.code == 200) {
+          res.data.data.forEach(item=>{
+            item.label= item.unitName
+            item.value= item.id
+          })
           this.companyOption = res.data.data
         } else {
           this.$message.error(res.data.message)
@@ -362,6 +392,8 @@ export default {
         }
       })
     },
+
+    //拆分地区字段
     onchangeplace(val, type) {
       if (type == 'view') {
         this.from.area = val[0]
@@ -373,11 +405,13 @@ export default {
 
     },
 
+    //拆分时间字段
     selectTime(val){
       this.from.fromDate = val[0]
       this.from.toDate = val[1]
     },
 
+    //获取数据列表
     getData() {
       subscriberCardList(this.from).then(res => {
         console.log(res)
@@ -428,10 +462,9 @@ export default {
           }
         })
       }
-
-
     },
 
+    //根据派发单位名称获取派发单位id
     getCompanyById(unitName) {
       for (const argumentsKey in this.companyOption) {
         if (this.companyOption[argumentsKey].unitName == unitName) {
@@ -441,7 +474,6 @@ export default {
     },
 
     handleSelectionChange(val) {
-      console.log(val)
       this.multipleSelection = val;
     },
     // 处理好要导出的数据放到(this.exel里)
@@ -455,33 +487,52 @@ export default {
       this.exel = exel
     },
 
+    //禁止输入空格
+    keyup(e,name){
+      this.editFrom[name]=this.editFrom[name].replace(/\s+/g,'')
+    },
+
     // 点击导出Exel
     exported() {
-      let ids = []
-      this.multipleSelection.forEach(item => {
-        ids.push(item.id)
-      })
-      var day2 = new Date();
-      day2.setTime(day2.getTime());
-      var s2 = day2.getFullYear() + "-" + (day2.getMonth() + 1) + "-" + day2.getDate();
-      const loading = this.$loading({
-        lock: true,
-        text: 'Loading',
-        spinner: 'el-icon-loading',
-        background: 'rgba(0, 0, 0, 0.7)'
-      });
-      exportSubscriberCardList(ids).then(response => {
-            console.log(response)
-            loading.close();
-            this.downLoadXls(response.data, s2 + '.xlsx')
-          }
-      )
-
-      this.initExportData()
-      const ws = XLSX.utils.aoa_to_sheet(this.exel);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "SheetJS");
-      // XLSX.writeFile(wb, "订阅卡信息.xlsx")
+        let ids = []
+        this.multipleSelection.forEach(item => {
+          ids.push(item.id)
+        })
+        var day2 = new Date();
+        day2.setTime(day2.getTime());
+        var s2 = day2.getFullYear() + "-" + (day2.getMonth() + 1) + "-" + day2.getDate();
+        const loading = this.$loading({
+          lock: true,
+          text: 'Loading',
+          spinner: 'el-icon-loading',
+          background: 'rgba(0, 0, 0, 0.7)'
+        });
+        let obj={
+          ...this.from
+        }
+        delete obj.pageSize
+        delete obj.pageNo
+      if(this.multipleSelection.length>0){
+        exportSubscriberCardList({
+          ids:ids.toString(),
+          ...obj
+        }).then(response => {
+              console.log(response)
+              loading.close();
+              this.downLoadXls(response.data, s2 + '.xlsx')
+            }
+        )
+      }else{
+        exportSubscriberCardList({
+          ids:'',
+          ...obj
+        }).then(response => {
+              console.log(response)
+              loading.close();
+              this.downLoadXls(response.data, s2 + '.xlsx')
+            }
+        )
+      }
     },
 
     downLoadXls(data, filename) {
@@ -508,6 +559,12 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+@media screen and (min-width: 1281px) {
+  .mar18{
+    margin: 0 0.5rem;
+  }
+}
+
 .content {
   width: 100%;
   height: 100%;
@@ -522,13 +579,17 @@ export default {
   }
 }
 
+.minw_14{
+  min-width: 14rem;
+}
+
 .circr {
   width: 8px;
   height: 8px;
   border-radius: 90px;
   background-color: #255AFF;
 }
-
+/*
 /deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar {
   width: 0 !important;
   display: none !important;
@@ -542,7 +603,7 @@ export default {
 /deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar-thumb {
   width: 0 !important;
   display: none !important;
-}
+}*/
 
 /deep/ .el-table__body {
   width: 100% !important;
@@ -555,12 +616,15 @@ export default {
   color: #1F242E;
 }
 
-/deep/ .el-table td.gutter, .el-table th.gutter {
+/*/deep/ .el-table td.gutter, .el-table th.gutter {
   display: none;
 }
 
 /deep/ .el-table__fixed-right-patch {
   display: none;
+}*/
+/deep/ .el-table th>.cell{
+  padding: 0 14px;
 }
 
 /deep/ .el-pagination__total {

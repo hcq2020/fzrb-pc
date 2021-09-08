@@ -13,6 +13,8 @@
         </el-dropdown-menu>
       </el-dropdown>
     </span>
+
+<!--修改密码-->
     <el-dialog  title="修改密码" width="500px" :visible.sync="dialogFormVisible" :close-on-click-modal=false>
       <div class="tips">
         密码必须由8~12位英文字母、数字或特殊字符组成（不允许有空格），且至少包含字母、数字、特殊字符中的两种。
@@ -45,10 +47,10 @@ export default {
   name: "hander",
   data() {
     var validatPassword = (rule, value, callback) => {
-      let rex=/^(?=.*\d)(?=.*[a-zA-Z])|(?=.*[_])[a-zA-Z0-9_]{8,10}$/
+      let rex=/^(?=.*\d)(?=.*[a-zA-Z])[a-zA-Z0-9_]{8,16}$/
       if (value === '') {
         callback(new Error('原密码不能为空'));
-      }if(rex.test(value)){
+      }if(!rex.test(value)){
         callback(new Error('密码必须由8~12位英文字母、数字或特殊字符组成（不允许有空格），且至少包含字母、数字、特殊字符中的两种。'));
       } else {
         callback();
@@ -58,8 +60,11 @@ export default {
       },3000)
     };
     var validatnewPassword = (rule, value, callback) => {
+      let rex=/^(?=.*\d)(?=.*[a-zA-Z])[a-zA-Z0-9_]{8,16}$/
       if (value === '') {
         callback(new Error('新密码不能为空'));
+      }if(!rex.test(value)){
+        callback(new Error('密码必须由8~12位英文字母、数字或特殊字符组成（不允许有空格），且至少包含字母、数字、特殊字符中的两种。'));
       } else {
         callback();
       }
@@ -81,7 +86,7 @@ export default {
     };
     return {
       img: 'img/touxiang.png',
-      user: '张晓宇',
+      user: '',
       dialogFormVisible:false,
       editFrom:{
         confirm_password: "",
@@ -105,7 +110,18 @@ export default {
 
   },
   mounted() {
-
+    this.user=localStorage.getItem('userName')?localStorage.getItem('userName'):''
+  },
+  watch:{
+    $route: {
+      handler(to,from) {
+        if(from!=undefined && from.name === 'Login'){
+          this.user=localStorage.getItem('userName')
+        }
+      },
+      deep:true,
+      immediate: true
+    }
   },
   methods: {
     back() {
@@ -151,48 +167,100 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-.head {
-  width: 100%;
-  height: 5.03rem;
-  background: url('~@/assets/image/header_bg.png');
-  background-size: cover;
-  border: 0px solid #707070;
-  opacity: 1;
-  box-sizing: border-box;
-  padding: 0 2.5rem;
+@media screen and (max-width: 1536px) {
+  .head {
+    width: 100%;
+    min-width: 75rem;
+    height: 5.03rem;
+    background: url('~@/assets/image/header_bg.png');
+    background-size: cover;
+    border: 0px solid #707070;
+    opacity: 1;
+    box-sizing: border-box;
+    padding: 0 2.5rem;
 
-  .title {
-    font-size: 2.13rem;
-    font-family: Microsoft YaHei;
-    font-weight: bold;
-    color: #FFFFFF;
-    line-height: 5.03rem;
-  }
-
-  .user {
-    float: right;
-    line-height: 5.03rem;
-    img{
-      width: 2.25rem;
-      vertical-align: middle;
-    }
-    .el-dropdown{
-      font-size: 1.13rem;
+    .title {
+      font-size: 2.13rem;
+      font-family: Microsoft YaHei;
+      font-weight: bold;
       color: #FFFFFF;
-      cursor: pointer;
+      line-height: 5.03rem;
+    }
+
+    .user {
+      float: right;
+      line-height: 5.03rem;
+      img{
+        vertical-align: middle;
+      }
+      .el-dropdown{
+        font-size: 1.13rem;
+        color: #FFFFFF;
+        cursor: pointer;
+      }
     }
   }
+
+  .tips{
+    font-size: 12px;
+    line-height: 16px;
+    color: #255AFF;
+    margin: 30px 0 30px 0;
+  }
+
+  .el-form-item {
+    margin-bottom: 42px;
+  }
+
+
+}
+@media screen and (min-width: 1537px) {
+  .head {
+    width: 100%;
+    min-width: 95rem;
+    height: 5.03rem;
+    background: url('~@/assets/image/header_bg.png');
+    background-size: cover;
+    border: 0px solid #707070;
+    opacity: 1;
+    box-sizing: border-box;
+    padding: 0 2.5rem;
+
+    .title {
+      font-size: 2.13rem;
+      font-family: Microsoft YaHei;
+      font-weight: bold;
+      color: #FFFFFF;
+      line-height: 5.03rem;
+    }
+
+    .user {
+      float: right;
+      line-height: 5.03rem;
+      img{
+        vertical-align: middle;
+      }
+      .el-dropdown{
+        font-size: 1.13rem;
+        color: #FFFFFF;
+        cursor: pointer;
+      }
+    }
+  }
+
+  .tips{
+    font-size: 12px;
+    line-height: 16px;
+    color: #255AFF;
+    margin: 30px 0 30px 0;
+  }
+
+  .el-form-item {
+    margin-bottom: 42px;
+  }
+
+
 }
 
-.tips{
-  font-size: 12px;
-  line-height: 16px;
-  color: #255AFF;
-  margin: 30px 0 30px 0;
-}
-
-.el-form-item {
-  margin-bottom: 42px;
-}
 
 </style>

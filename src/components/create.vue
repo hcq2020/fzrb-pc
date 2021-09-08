@@ -13,11 +13,10 @@
       </div>
       <div>
         <el-button type="primary" @click="generate">生成</el-button>
-        <el-button type="primary" @click="save" :disabled="tableData.length>0?false:true">保存</el-button>
         <el-button @click="reset">重置</el-button>
       </div>
       <div class="f1" style="min-width: 12rem">
-        <el-button class="f_right" type="primary" :disabled="saveCard.length>0?false:true" @click="exported">导出</el-button>
+        <el-button class="f_right" type="primary" :disabled="tableData.length>0?false:true" @click="save">导出</el-button>
       </div>
     </div>
     <div class="table mt18">
@@ -63,7 +62,6 @@
 </template>
 
 <script>
-import XLSX from 'xlsx';
 import {batchGeneration, batchSaveDistributionUnit, exportCard, getunitDistributionUnitList, saveCard} from "@/api";
 
 export default {
@@ -139,8 +137,8 @@ export default {
               item.unitName = this.getCompanyById(item.unitId)
             })
             this.tableData = res.data.data
-            this.isSave=false
             this.saveCard=[]
+            this.isSave=false
           } else {
             this.$message.error(res.data.message)
           }
@@ -163,13 +161,13 @@ export default {
           if (res.data.code == 200) {
             this.saveCard = res.data.data
             this.isSave=true
-            this.$message.success('保存成功')
+            this.exported()
           } else {
             this.$message.warning(res.data.message)
           }
         })
       }else{
-        this.$message.warning('请勿重复操作！')
+        this.exported()
       }
 
     },
@@ -186,7 +184,9 @@ export default {
     //重置
     reset() {
       this.tableData = []
+      this.saveCard=[]
       this.from.company = ''
+      this.from.unitId = ''
       this.from.num = 0
     },
     //添加派发单位
@@ -200,7 +200,6 @@ export default {
         ]).then(res => {
           if (res.data.code == 200) {
             this.dialogFormVisible = false
-            console.log(res)
             this.getPlace()
           } else {
             this.$message.error(res.data.message)
@@ -234,17 +233,9 @@ export default {
       var s2 = day2.getFullYear() + "-" + (day2.getMonth() + 1) + "-" + day2.getDate();
       exportCard(ids).then(response => {
             console.log(response)
-            this.downLoadXls(response.data, s2 + this.exel[1][3] + ".xlsx")
+            this.downLoadXls(response.data, s2 + this.tableData[0].unitName + ".xlsx")
           }
       )
-
-
-      this.initExportData()
-      const ws = XLSX.utils.aoa_to_sheet(this.exel);
-      const wb = XLSX.utils.book_new();
-      XLSX.utils.book_append_sheet(wb, ws, "SheetJS");
-
-      //   XLSX.writeFile(wb, s2+this.exel[1][3]+".xlsx")
     },
 
     downLoadXls(data, filename) {
@@ -279,7 +270,7 @@ export default {
   }
 }
 
-/deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar {
+/*/deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar {
   width: 0 !important;
   display: none !important;
 }
@@ -292,7 +283,7 @@ export default {
 /deep/ .el-table--scrollable-y .el-table__body-wrapper::-webkit-scrollbar-thumb {
   width: 0 !important;
   display: none !important;
-}
+}*/
 
 /deep/ .el-table__body {
   width: 100% !important;
@@ -305,12 +296,12 @@ export default {
   color: #1F242E;
 }
 
-/deep/ .el-table td.gutter, .el-table th.gutter {
+/*/deep/ .el-table td.gutter, .el-table th.gutter {
   display: none;
 }
 
 /deep/ .el-table__fixed-right-patch {
   display: none;
-}
+}*/
 </style>
 

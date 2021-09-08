@@ -4,14 +4,19 @@ module.exports = {
     port: 8080,
     open: true,
     proxy: {
-      '/api': {
-        target: 'http://47.101.209.229:7788',
-        ws: false,
+      '/dev-api': {
+        target: 'http://47.101.209.229:7788/api',
         changeOrigin: true,
         pathRewrite: {
-          '^/api': '/api'
+          '^/dev-api':''
         }
-      }
+      },
+      '/api': {
+        target: 'http://47.101.209.229:7788/api',
+        changeOrigin: true,
+        pathRewrite: {
+        }
+      },
     },
     disableHostCheck: true
   },

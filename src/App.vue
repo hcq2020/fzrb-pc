@@ -21,14 +21,24 @@ export default {
 
 #app {
   position: relative;
-  width: 120rem;
+//  min-width: 120rem;
+  width: 100%;
   height: 100%;
   overflow: auto;
 }
 
-html,body{
-  font-size: 16px;
+@media screen and (max-width: 1536px) {
+  html,body{
+    font-size: 12px;
+  }
 }
+
+@media screen and (min-width: 1537px) {
+  html,body{
+    font-size: 16px;
+  }
+}
+
 
 </style>
 
